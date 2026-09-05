@@ -1,0 +1,23 @@
+# credentials -- the database password lives here
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# the user's own material, deliberately not published
+wiki/
+wiki_PNG/
+CLAUDE.md
+
+# 90 MB of MySQL dumps taken before repairing the tables; not code
+backups/
+
+# every chart and result produced before four separate corrections.
+# kept locally as a record, but nothing in it should be read as a result
+_invalid_outputs/
+
+data/cache/
+models/

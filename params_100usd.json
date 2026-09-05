@@ -1,0 +1,19 @@
+{
+  "atr_mult": 4.2,
+  "max_open": 3,
+  "stop_extra": 1.5,
+  "rebound": 0.45,
+  "vol_block": 1.15,
+  "vol_floor": 0.0,
+  "atr_fast": 20,
+  "atr_slow": 200,
+  "side": "both",
+  "er_window": 0,
+  "er_block": 1.0,
+  "dd_pause": null,
+  "dd_pause_bars": 350,
+  "max_hold_days": null,
+  "equity_stop": 22.0,
+  "spread_pips": 1.8,
+  "lot": 0.01
+}
