@@ -95,7 +95,37 @@ def efficiency_ratio(df: pd.DataFrame, window: int) -> np.ndarray:
     return pd.Series(er).ffill().fillna(0.0).to_numpy()
 
 
-def volatility(df: pd.DataFrame, fast: int, slow: int, pip: float):
+def _seasonal_baseline(tr: pd.Series) -> pd.Series:
+    """
+    Typical true range for this hour of the day, learned from past days only.
+
+    An ATR(200) on m5 spans seventeen hours, which is less than a day, so
+    a ratio against it cannot tell "this market is unusually fast" apart
+    from "it is eleven in the morning". Measured over fifteen years, 54%
+    to 59% of that ratio's variance is explained by the clock alone, and a
+    gate set at 1.15 turned out to block 76-97% of the London and New York
+    hours while passing 97-99% of the Asian ones -- filtering out the
+    sessions that make the money and waving through the session that
+    loses it.
+
+    Comparing each bar to its own hour's history removes the daily shape
+    and leaves the part that is actually about regime. The expanding mean
+    is shifted a day back so a bar is never compared against a baseline
+    that already contains it.
+    """
+    hours = tr.index.hour
+    out = pd.Series(index=tr.index, dtype=float)
+    for h in range(24):
+        m = hours == h
+        if not m.any():
+            continue
+        s = tr[m]
+        out[m] = s.expanding(min_periods=20).mean().shift(1)
+    return out.ffill()
+
+
+def volatility(df: pd.DataFrame, fast: int, slow: int, pip: float,
+               seasonal: bool = False):
     """
     Return (atr_pips, ratio). `ratio` is the fast ATR over the slow one --
     a unitless measure of "faster than usual", which transfers across
@@ -112,16 +142,18 @@ def volatility(df: pd.DataFrame, fast: int, slow: int, pip: float):
     live = df["high"].to_numpy() > df["low"].to_numpy()
     tr = tr.where(live)
     atr = tr.rolling(fast, min_periods=max(2, fast // 2)).mean()
-    base = tr.rolling(slow, min_periods=max(5, slow // 4)).mean()
+    base = (_seasonal_baseline(tr) if seasonal
+            else tr.rolling(slow, min_periods=max(5, slow // 4)).mean())
     atr_pips = (atr / pip).ffill().bfill().to_numpy(dtype=float)
-    ratio = (atr / base).ffill().bfill().to_numpy(dtype=float)
-    return atr_pips, ratio
+    ratio = (atr / base).replace([np.inf, -np.inf], np.nan).ffill().bfill()
+    return atr_pips, ratio.to_numpy(dtype=float)
 
 
 class AdaptiveConfig:
     def __init__(self, atr_mult=4.0, max_open=3, stop_extra=2.0,
                  atr_fast=20, atr_slow=200, vol_block=1.8,
                  er_window=0, er_block=1.0, dd_pause=None, dd_pause_bars=0,
+                 seasonal_vol=False, block_hours=(),
                  rebound=0.0, vol_floor=0.0, equity_stop=None,
                  equity_stop_pct=None, compound=False,
                  equity_per_lot_step=100.0, start_cash=100.0, lot_step=0.01,
@@ -154,6 +186,17 @@ class AdaptiveConfig:
         # the opposite of the usual advice, and the reason this floor
         # exists as a searchable number rather than a fixed rule.
         self.vol_floor = vol_floor
+        # Measure volatility against this hour's own history rather
+        # than a 17-hour average, so the gate reads regime and not
+        # the clock. See _seasonal_baseline.
+        self.seasonal_vol = seasonal_vol
+        # Hours (broker clock) in which no new position may be opened.
+        # Stated openly rather than left to emerge from a volatility ratio
+        # that was two thirds time-of-day: 96% of EURUSD's profit and 93%
+        # of gold's is opened between 19:00 and 23:00, and the Asian hours
+        # lose money on both. Whether that is worth acting on is what this
+        # exists to measure, not something to assume.
+        self.block_hours = frozenset(block_hours)
         # Trend gate. er_window=0 disables it; otherwise entries stop
         # while the efficiency ratio is above er_block, i.e. while price
         # is travelling in a line rather than oscillating.
@@ -271,7 +314,8 @@ def run_adaptive(df: pd.DataFrame, cfg: AdaptiveConfig) -> dict:
     days = df.index.normalize().to_numpy()
     live = high > low                     # a bar with no range is a shut market
 
-    atr_pips, vol_ratio = volatility(df, cfg.atr_fast, cfg.atr_slow, cfg.pip)
+    atr_pips, vol_ratio = volatility(df, cfg.atr_fast, cfg.atr_slow, cfg.pip,
+                                     seasonal=cfg.seasonal_vol)
     er = (efficiency_ratio(df, cfg.er_window) if cfg.er_window
           else np.zeros(len(df)))
 
@@ -361,7 +405,8 @@ def run_adaptive(df: pd.DataFrame, cfg: AdaptiveConfig) -> dict:
                 continue
 
         # --- entries, capped and regime-gated -------------------------
-        calm = (cfg.vol_floor <= vol_ratio[i] <= cfg.vol_block
+        calm = (pd.Timestamp(t).hour not in cfg.block_hours
+                and cfg.vol_floor <= vol_ratio[i] <= cfg.vol_block
                 and (not cfg.er_window or er[i] <= cfg.er_block)
                 and i >= pause_until)
         if not calm and len(open_pos) < cfg.max_open:
