@@ -32,7 +32,7 @@ from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-RESULTS = ROOT / "results"
+RESULTS = ROOT / "results" / "baseline"
 PLOTS = ROOT / "plots" / ("experiments" if "--compound" in sys.argv
                           else "baseline")
 START, END, CASH = "2006-01-01", "2024-12-31", 100.0
@@ -88,7 +88,7 @@ def flat_episodes(daily_eq):
 
 
 def main():
-    RESULTS.mkdir(exist_ok=True)
+    RESULTS.mkdir(parents=True, exist_ok=True)
     PLOTS.mkdir(parents=True, exist_ok=True)
     all_ep, summary, curves = [], [], {}
 

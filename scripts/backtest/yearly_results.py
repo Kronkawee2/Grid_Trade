@@ -32,7 +32,7 @@ from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-OUT = ROOT / "results"
+OUT = ROOT / "results" / "baseline"
 START, END = "2006-01-01", "2024-12-31"
 CASH = 100.0
 
@@ -95,7 +95,7 @@ def summarise(t):
 
 
 def main():
-    OUT.mkdir(exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     tables, summaries = [], []
     for spec, sym in MARKETS:
         df = load_bars(sym, "m5", start=START, end=END)

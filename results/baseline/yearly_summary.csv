@@ -1,0 +1,5 @@
+market,mode,years,final_balance,cagr_pct,positive_years,median_year_pct,best_year_pct,worst_year_pct,year_to_year_swing,worst_drawdown_pct
+EURUSD,fixed_lot,19,1333.04,14.6,19,6.49,145.65,0.23,32.38,16.08
+EURUSD,compounding,19,1277105.61,64.48,18,25.63,290.65,-1.97,94.65,20.72
+XAUUSD,fixed_lot,19,2238.21,17.77,19,13.39,82.76,0.15,22.6,18.24
+XAUUSD,compounding,19,3895159.12,74.42,19,36.84,506.32,0.67,141.36,35.87
