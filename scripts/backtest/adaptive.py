@@ -153,7 +153,7 @@ class AdaptiveConfig:
     def __init__(self, atr_mult=4.0, max_open=3, stop_extra=2.0,
                  atr_fast=20, atr_slow=200, vol_block=1.8,
                  er_window=0, er_block=1.0, dd_pause=None, dd_pause_bars=0,
-                 seasonal_vol=False, block_hours=(),
+                 seasonal_vol=False, block_hours=(), fixed_spacing_pips=None,
                  rebound=0.0, vol_floor=0.0, equity_stop=None,
                  equity_stop_pct=None, compound=False,
                  equity_per_lot_step=100.0, start_cash=100.0, lot_step=0.01,
@@ -197,6 +197,12 @@ class AdaptiveConfig:
         # lose money on both. Whether that is worth acting on is what this
         # exists to measure, not something to assume.
         self.block_hours = frozenset(block_hours)
+        # Replaces `atr_mult x ATR` with a constant, to isolate what the
+        # volatility scaling is actually worth. Everything else -- the
+        # cap, the rebound, the gate, the equity stop -- is unchanged, so
+        # the difference between the two runs is the adaptation and
+        # nothing else.
+        self.fixed_spacing_pips = fixed_spacing_pips
         # Trend gate. er_window=0 disables it; otherwise entries stop
         # while the efficiency ratio is above er_block, i.e. while price
         # is travelling in a line rather than oscillating.
@@ -323,7 +329,8 @@ def run_adaptive(df: pd.DataFrame, cfg: AdaptiveConfig) -> dict:
     do_sell = cfg.side in ("sell", "both")
 
     anchor = close[0]
-    spacing = max(atr_pips[0] * cfg.atr_mult, 5.0) * cfg.pip
+    spacing = (cfg.fixed_spacing_pips * cfg.pip if cfg.fixed_spacing_pips
+               else max(atr_pips[0] * cfg.atr_mult, 5.0) * cfg.pip)
     open_pos: list[Pos] = []
     held: set[tuple[str, int]] = set()
     # Levels touched but not yet confirmed, and the bar the touch happened
@@ -368,7 +375,8 @@ def run_adaptive(df: pd.DataFrame, cfg: AdaptiveConfig) -> dict:
         # A floor keeps the grid from collapsing to nothing in dead hours,
         # where ATR can fall below the spread and every level would be a
         # guaranteed loss.
-        spacing = max(atr_pips[i] * cfg.atr_mult, 5.0) * cfg.pip
+        spacing = (cfg.fixed_spacing_pips * cfg.pip if cfg.fixed_spacing_pips
+                   else max(atr_pips[i] * cfg.atr_mult, 5.0) * cfg.pip)
         held.clear()
         box_start = i
 
