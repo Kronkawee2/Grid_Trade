@@ -1,0 +1,3 @@
+market,span_days,days_in_stagnation,share_of_life_stagnant_pct,episodes,longest_flat_days,longest_flat_years,median_flat_days,market_vol_when_flat,market_vol_when_growing
+EURUSD,6939,5848,84.3,11,1483,4.06,290,8.5,10.0
+XAUUSD,6939,5854,84.4,18,623,1.71,241,17.1,19.1

@@ -34,7 +34,7 @@ from plot_run import draw  # noqa: E402
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-OUT = ROOT / "plots"
+OUT = ROOT / "plots" / "baseline"
 CASH = 100.0
 
 PARAMS = json.loads((ROOT / "params_100usd.json").read_text())
@@ -135,7 +135,7 @@ def regime_chart(store, path):
 
 
 def main():
-    OUT.mkdir(exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     store, summary = {}, []
     for tag, sym, spec, a, b, label in RUNS:
         df = load_bars(sym, "m5", start=a, end=b)

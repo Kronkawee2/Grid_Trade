@@ -32,12 +32,20 @@ from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-RESULTS, PLOTS = ROOT / "results", ROOT / "plots"
+RESULTS = ROOT / "results"
+PLOTS = ROOT / "plots" / ("experiments" if "--compound" in sys.argv
+                          else "baseline")
 START, END, CASH = "2006-01-01", "2024-12-31", 100.0
 
 # A stretch shorter than this is an ordinary pause between trades, not a
 # stagnation worth naming.
 MIN_FLAT_DAYS = 90
+
+# The baseline trades a fixed 0.01 lot. Compounding is a separate
+# experiment and mixing the two in one chart makes the picture unreadable,
+# so it is a switch rather than a default.
+COMPOUND = "--compound" in sys.argv
+TAG = "compounding" if COMPOUND else "baseline"
 
 PARAMS = json.loads((ROOT / "params_100usd.json").read_text())
 SPECS = json.loads((ROOT / "symbol_specs.json").read_text())
@@ -57,7 +65,7 @@ def money(spec):
                 spread_pips=s["spread_points"] / 10,
                 swap_long_pips=s["swap_long"] / 10,
                 swap_short_pips=s["swap_short"] / 10,
-                start_cash=CASH, max_lot=MAX_LOT[spec], compound=True)
+                start_cash=CASH, max_lot=MAX_LOT[spec], compound=COMPOUND)
 
 
 def flat_episodes(daily_eq):
@@ -81,7 +89,7 @@ def flat_episodes(daily_eq):
 
 def main():
     RESULTS.mkdir(exist_ok=True)
-    PLOTS.mkdir(exist_ok=True)
+    PLOTS.mkdir(parents=True, exist_ok=True)
     all_ep, summary, curves = [], [], {}
 
     for spec, sym in MARKETS:
@@ -126,8 +134,8 @@ def main():
 
     if all_ep:
         pd.concat(all_ep, ignore_index=True).to_csv(
-            RESULTS / "stagnation_episodes.csv", index=False)
-    pd.DataFrame(summary).to_csv(RESULTS / "stagnation_summary.csv", index=False)
+            RESULTS / f"stagnation_episodes_{TAG}.csv", index=False)
+    pd.DataFrame(summary).to_csv(RESULTS / f"stagnation_summary_{TAG}.csv", index=False)
 
     fig, axes = plt.subplots(2, 1, figsize=(15, 9), gridspec_kw={"hspace": 0.25})
     for ax, (spec, (eq, ep, vol)) in zip(axes, curves.items()):
@@ -140,12 +148,12 @@ def main():
                      f"{len(ep)} episodes)", fontsize=11)
         ax.grid(alpha=.25, which="both")
         ax.legend(loc="upper left", fontsize=9)
-    fig.savefig(PLOTS / "stagnation.png", dpi=125, bbox_inches="tight")
+    fig.savefig(PLOTS / f"stagnation_{TAG}.png", dpi=125, bbox_inches="tight")
     plt.close(fig)
 
-    print(f"\nsaved -> {RESULTS/'stagnation_episodes.csv'}")
-    print(f"saved -> {RESULTS/'stagnation_summary.csv'}")
-    print(f"saved -> {PLOTS/'stagnation.png'}")
+    print(f"\nsaved -> {RESULTS/f'stagnation_episodes_{TAG}.csv'}")
+    print(f"saved -> {RESULTS/f'stagnation_summary_{TAG}.csv'}")
+    print(f"saved -> {PLOTS/f'stagnation_{TAG}.png'}")
 
 
 if __name__ == "__main__":
