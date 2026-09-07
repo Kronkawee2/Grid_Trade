@@ -65,11 +65,14 @@ def true_range(df: pd.DataFrame) -> np.ndarray:
         (df["high"] - prev_close).abs().to_numpy(dtype=float),
         (df["low"] - prev_close).abs().to_numpy(dtype=float),
     ])
-    broken = df.index.to_series().diff() > MAX_CONTINUOUS_BREAK
-    if broken.any():
-        own = (df["high"] - df["low"]).to_numpy(dtype=float)
-        tr = np.where(broken.to_numpy(), own, tr)
-    return tr
+    own = (df["high"] - df["low"]).to_numpy(dtype=float)
+    # The first bar has no previous close, so the comparisons above give
+    # NaN. It used to be laundered away by a later ffill/bfill, which
+    # works by accident rather than by design; the bar's own high-low is
+    # the right answer and needs no laundering.
+    broken = (df.index.to_series().diff() > MAX_CONTINUOUS_BREAK).to_numpy()
+    broken[0] = True
+    return np.where(broken, own, tr)
 
 
 def efficiency_ratio(df: pd.DataFrame, window: int) -> np.ndarray:

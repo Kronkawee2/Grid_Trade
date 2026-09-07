@@ -45,13 +45,16 @@ BASE = json.loads((ROOT / "params_100usd.json").read_text())
 # Deliberately coarse. A fine grid inside each window would mostly measure
 # how many combinations were tried, and the point here is the stability of
 # the choice, not its precision.
-AXES = {"atr_mult": [3.5, 4.2, 5.5],
-        "rebound": [0.3, 0.45, 0.6],
-        "vol_block": [1.0, 1.15, 1.4],
-        "atr_fast": [10, 20],
-        "atr_slow": [200, 288]}
+# The current values sit in the middle of each list, so the question is
+# precise: with no sight of the year being traded, does the search keep
+# landing where the baseline already is?
+AXES = {"atr_mult": [4.2, 5.0, 5.8],
+        "rebound": [0.5, 0.65, 0.8],
+        "vol_block": [0.8, 0.9, 1.05],
+        "atr_fast": [5, 10, 20]}
 HELD = dict(stop_extra=BASE["stop_extra"], max_open=BASE["max_open"],
             equity_stop=BASE["equity_stop"], dd_pause_bars=BASE["dd_pause_bars"],
+            atr_slow=BASE["atr_slow"],
             side="both", vol_floor=0.0, er_window=0, er_block=1.0,
             dd_pause=None, max_hold_days=None, block_hours=())
 MIN_TRADES = 40          # per window; below this the score is an accident
