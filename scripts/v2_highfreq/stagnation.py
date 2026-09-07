@@ -26,15 +26,19 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-RESULTS = ROOT / "results" / "baseline"
+# งานพัฒนา -- แก้ไฟล์ในโฟลเดอร์นี้ได้ ไม่กระทบ v1
+# อ่านค่าจาก configs/v2_highfreq.json เท่านั้น และเขียนผลลง plots/v2_highfreq/ กับ results/v2_highfreq/
+# เวอร์ชันอื่นมีสำเนาสคริปต์ของตัวเอง จึงแก้ทับกันไม่ได้
+VERSION = "v2_highfreq"
+RESULTS = ROOT / "results" / VERSION
 PLOTS = ROOT / "plots" / ("experiments" if "--compound" in sys.argv
-                          else "baseline")
+                          else VERSION)
 START, END, CASH = "2006-01-01", "2024-12-31", 100.0
 
 # A stretch shorter than this is an ordinary pause between trades, not a
@@ -47,7 +51,7 @@ MIN_FLAT_DAYS = 90
 COMPOUND = "--compound" in sys.argv
 TAG = "compounding" if COMPOUND else "baseline"
 
-PARAMS = json.loads((ROOT / "params_100usd.json").read_text())
+PARAMS = json.loads((ROOT / "configs" / f"{VERSION}.json").read_text())
 SPECS = json.loads((ROOT / "symbol_specs.json").read_text())
 GRID = {k: PARAMS[k] for k in
         ("atr_mult", "max_open", "stop_extra", "rebound", "vol_block", "vol_floor",

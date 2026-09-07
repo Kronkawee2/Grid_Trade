@@ -38,7 +38,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 from grid import GridConfig, run_grid, summarise  # noqa: E402
 from run_baseline import (  # noqa: E402
     PIP, PIP_VALUE, SPREAD_PIPS, SWAP_LONG, SWAP_SHORT, SYMBOL, TIMEFRAME,

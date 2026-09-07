@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 from grid import GridConfig, run_grid, summarise  # noqa: E402
 
 from quantdata import load_bars  # noqa: E402

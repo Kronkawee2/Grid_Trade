@@ -27,17 +27,21 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 from adaptive import AdaptiveConfig, run_adaptive, volatility  # noqa: E402
 from plot_run import draw  # noqa: E402
 
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-OUT = ROOT / "plots" / "baseline"
+# BASELINE -- ล็อกแล้ว ห้ามแก้ไฟล์ในโฟลเดอร์นี้
+# อ่านค่าจาก configs/v1_baseline.json เท่านั้น และเขียนผลลง plots/v1_baseline/ กับ results/v1_baseline/
+# เวอร์ชันอื่นมีสำเนาสคริปต์ของตัวเอง จึงแก้ทับกันไม่ได้
+VERSION = "v1_baseline"
+OUT = ROOT / "plots" / VERSION
 CASH = 100.0
 
-PARAMS = json.loads((ROOT / "params_100usd.json").read_text())
+PARAMS = json.loads((ROOT / "configs" / f"{VERSION}.json").read_text())
 SPECS = json.loads((ROOT / "symbol_specs.json").read_text())
 GRID = {k: PARAMS[k] for k in
         ("atr_mult", "max_open", "stop_extra", "rebound", "vol_block", "vol_floor",

@@ -29,7 +29,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "engine"))
 from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 
 from quantdata import load_bars  # noqa: E402
