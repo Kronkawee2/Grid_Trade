@@ -33,9 +33,9 @@ from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 # งานพัฒนา -- แก้ไฟล์ในโฟลเดอร์นี้ได้ ไม่กระทบ v1
-# อ่านค่าจาก configs/v2_highfreq.json เท่านั้น และเขียนผลลง plots/v2_highfreq/ กับ results/v2_highfreq/
+# อ่านค่าจาก configs/v1_highfreq.json เท่านั้น และเขียนผลลง plots/v1_highfreq/ กับ results/v1_highfreq/
 # เวอร์ชันอื่นมีสำเนาสคริปต์ของตัวเอง จึงแก้ทับกันไม่ได้
-VERSION = "v2_highfreq"
+VERSION = "v1_highfreq"
 RESULTS = ROOT / "results" / VERSION
 PLOTS = ROOT / "plots" / ("experiments" if "--compound" in sys.argv
                           else VERSION)

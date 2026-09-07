@@ -33,9 +33,9 @@ from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 # BASELINE -- ล็อกแล้ว ห้ามแก้ไฟล์ในโฟลเดอร์นี้
-# อ่านค่าจาก configs/v1_baseline.json เท่านั้น และเขียนผลลง plots/v1_baseline/ กับ results/v1_baseline/
+# อ่านค่าจาก configs/baseline.json เท่านั้น และเขียนผลลง plots/baseline/ กับ results/baseline/
 # เวอร์ชันอื่นมีสำเนาสคริปต์ของตัวเอง จึงแก้ทับกันไม่ได้
-VERSION = "v1_baseline"
+VERSION = "baseline"
 RESULTS = ROOT / "results" / VERSION
 PLOTS = ROOT / "plots" / ("experiments" if "--compound" in sys.argv
                           else VERSION)

@@ -32,10 +32,10 @@ from adaptive import AdaptiveConfig, run_adaptive  # noqa: E402
 from quantdata import load_bars  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent.parent
-# งานพัฒนา -- แก้ไฟล์ในโฟลเดอร์นี้ได้ ไม่กระทบ v1
-# อ่านค่าจาก configs/v2_highfreq.json เท่านั้น และเขียนผลลง plots/v2_highfreq/ กับ results/v2_highfreq/
+# BASELINE -- ล็อกแล้ว ห้ามแก้ไฟล์ในโฟลเดอร์นี้
+# อ่านค่าจาก configs/baseline.json เท่านั้น และเขียนผลลง plots/baseline/ กับ results/baseline/
 # เวอร์ชันอื่นมีสำเนาสคริปต์ของตัวเอง จึงแก้ทับกันไม่ได้
-VERSION = "v2_highfreq"
+VERSION = "baseline"
 OUT = ROOT / "results" / VERSION
 START, END = "2006-01-01", "2024-12-31"
 CASH = 100.0
